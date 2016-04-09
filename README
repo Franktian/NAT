@@ -1,0 +1,38 @@
+Program Overview:
+
+Main functional methods
+- sr_handlepacket
+  - sr_handle_arp_packet
+    - sr_send_arp_reply
+    - sr_process_arp_reply
+
+  - sr_handle_ip_packet
+    - handle_arpreq
+    - sr_forward_ip_packet
+    - sr_send_arp_request
+    - sr_send_icmp
+
+Helper methods
+- sr_ip_destined_for_router_interfaces
+- sr_ip_sanity_check
+- sr_ip_recompute_checksum
+- sr_longest_prefix_match
+- sr_add_ethernet_header_and_send_packet
+
+For detailed comments on how the above methods works please refer to the docstrings in sr_router.c
+
+Design Decisions:
+
+The main program structure design was made based on the workflow from tutorial 2, the router is divided
+into two parts - handling IP packet and handling ARP packet.
+
+The packets we need to generate and send are, ICMP messages, ARP request and ARP reply. For creating ARP
+reply and requests, we have created a helper method add_ethernet_header_and_send_packet that can be used
+once the ARP header is created.
+
+We have created a helper method for forwarding IP packet, this method is used in two places, first one is
+when we know that this IP packet is not destined for the router, we don't do anything to the packet but
+just forward it, if we know that this IP packet is destined for the router and it is an ICMP echo request
+we then swap the IP source and destination, change the ICMP type 8 to type 0 and let it go through the
+standard IP forwarding logic, i.e. sanity check, decrement ttl and recompute checksum, look at cache table
+and determine if forward the packet or send ARP request asking for MAC address.
